@@ -1,4 +1,4 @@
-/** @MsSql Report v1.0.0
+/** MsSql Report v1.0.0
  * mssql-report.js
  *
  * Copyright (c) 2018-present, 
@@ -22,33 +22,50 @@ var mssqlsettings = createStore(editmssqlsettings, window.__REDUX_DEVTOOLS_EXTEN
 function editmssqlsettings(state = {
 		filters:{},
 		filter:{
-			warehouses:[], 
-			trademarks:[], 
+			warehouses:[],
+			wh_retail:[],
+			wh_wholesale:[],
+			trademarks:[],
+			bkgroups: [],
 			groups: [], 
-			subgroups: [], 
+			subgroups: [],
+			producer: [],
 			providers: []
 		}, 
 		all:{
-			warehouses:[], 
+			warehouses:[],
+			wh_retail:[],
+			wh_wholesale:[],
 			trademarks:[], 
+			bkgroups: [],
 			groups: [], 
-			subgroups: [], 
+			subgroups: [],
+			producer: [],
 			providers: []
 		}, 
 		tmp:{
 			search:{
 				warehouses:[], 
-				trademarks:[], 
+				wh_retail:[],
+				wh_wholesale:[],
+				trademarks:[],
+				bkgroups: [],
 				groups: [], 
 				subgroups: [], 
+				producer: [],
 				providers: []
 			},
 			namefilter:"",
+			typewh:"wh_retail",
 			searchstring: {
 				warehouses:"", 
+				wh_retail:"",
+				wh_wholesale:"",
 				trademarks:"", 
+				bkgroups: "",
 				groups: "", 
 				subgroups: "", 
+				producer: "",
 				providers: ""
 			},
 			startdate: new Date(),
@@ -56,23 +73,35 @@ function editmssqlsettings(state = {
 		},
 		uids:{
 			warehouses:{}, 
-			trademarks:{}, 
+			wh_retail:{},
+			wh_wholesale:{},
+			trademarks:{},
+			bkgroups: {},
 			groups: {}, 
 			subgroups: {}, 
+			producer: {},
 			providers: {}
 		},
 		uidssearch:{
 			warehouses:{}, 
+			wh_retail:{},
+			wh_wholesale:{},
 			trademarks:{}, 
+			bkgroups: {},
 			groups: {}, 
 			subgroups: {}, 
+			producer: {},
 			providers: {}
 		},
 		rusnames:{
-			warehouses:'Фильтр по складу', 
+			warehouses:'Фильтр по складу (все)', 
+			wh_retail:'Фильтр по складу (розница)',
+			wh_wholesale:'Фильтр по складу (опт)',
 			trademarks:'Фильтр по торговой марке', 
-			groups: 'Фильтр по группе', 
-			subgroups: 'Фильтр по подгруппе', 
+			bkgroups: 'Фильтр по группу Bookkepper',
+			groups: 'Фильтр по товарной группе', 
+			subgroups: 'Фильтр по товарной подгруппе', 
+			producer: 'Фильтр по производителю',
 			providers: 'Фильтр по поставщику'
 		}
 	}, action){
@@ -84,10 +113,17 @@ function editmssqlsettings(state = {
 						for(let uid in action.payload[type]){
 							state_new.all[type].push(_.clone(uid));
 							state_new.tmp.search[type].push(_.clone(uid));
-							state_new.uidssearch[type][uid] = _.clone(action.payload[type][uid].toUpperCase());
+							let realname = CyrilicDecoder(action.payload[type][uid]);
+							state_new.uidssearch[type][uid] = _.clone(realname.toUpperCase());
+							state_new.uids[type][uid] = realname;
+							if((type === 'wh_retail') || (type === 'wh_wholesale')){
+								state_new.all['warehouses'].push(_.clone(uid));
+								state_new.tmp.search['warehouses'].push(_.clone(uid));
+								state_new.uidssearch['warehouses'][uid] = _.clone(realname.toUpperCase());
+								state_new.uids['warehouses'][uid] = realname;
+							}
 						}
 					}
-					state_new.uids = _.clone(action.payload);
 					if(typeof(action.filters) === 'object'){
 						state_new.filters = action.filters;
 					}
@@ -110,6 +146,7 @@ function editmssqlsettings(state = {
 					state_new.tmp.startdate = new Date();
 					state_new.tmp.enddate = new Date();
 					state_new.tmp.namefilter = "";
+					state_new.tmp.typewh = "wh_retail";
 					return state_new;
 					break;
 				case 'SEARCH_FILTER':
@@ -131,6 +168,7 @@ function editmssqlsettings(state = {
 					var state_new = _.clone(state);
 					state_new.filter = _.clone(state.filters[action.payload.filter].filter);
 					state_new.tmp.namefilter = _.clone(state.filters[action.payload.filter].tmp.namefilter);
+					state_new.tmp.typewh = _.clone(state.filters[action.payload.filter].tmp.typewh);
 					for(let keysearchstring in state_new.tmp.searchstring){
 						state_new.tmp.searchstring[_.clone(keysearchstring)] = "";
 					}
@@ -147,6 +185,7 @@ function editmssqlsettings(state = {
 					state_new.filters[state_new.tmp.namefilter] = {};
 					state_new.filters[state_new.tmp.namefilter].tmp = {};
 					state_new.filters[state_new.tmp.namefilter].tmp.namefilter = _.clone(state.tmp.namefilter);
+					state_new.filters[state_new.tmp.namefilter].tmp.typewh = _.clone(state.tmp.typewh);
 					state_new.filters[state_new.tmp.namefilter].filter = _.clone(state.filter);
 					return state_new;
 					break;
@@ -167,6 +206,14 @@ function editmssqlsettings(state = {
 					}
 					return state_new;
 					break;
+				case 'SELECT_TYPE_WH':
+					var state_new = _.clone(state);
+					state_new.tmp.typewh = action.payload.typewh;
+					state_new.filter.warehouses = []; //очищаем список выбранных складов
+					state_new.filter.wh_retail = []; 
+					state_new.filter.wh_wholesale = []; 
+					return state_new;
+					break;
 				default:
 					break;
 			}
@@ -180,13 +227,28 @@ function mssqlgo(data){
 	alert(JSON.stringify(data));
 };
 
-function loadDataFilters(loadedfilters){
-	let all = {warehouses:{'8c92350c-42ae-430f-bf47-5fdd071d6586':'Медитек', 'c08b283-b9db-4da0-bfac-67c1eaa56fda':'Фармин', '0f29ebc3-454f-423e-9767-d97f2bf520d8':'Фитобел', '0ebe45c3-bf1e-4dc2-a7ec-395710ba0398':'Не Ска', '046c44cf-37e3-4179-9b8e-310e119ececf':'Комповид', 'cfaf75ef-4555-459a-80c9-e7b8b389d28a':'Здоровое решение', 'a839e60f-b6f5-4a13-a44c-525f35d2eef8':'Аптекарь', 'eece36db-d0cd-43cc-a589-5ad18d1de86d':'Любимая аптека', '021e66bb-03c2-44ec-aa9a-bd577e2c0e08':'Беролина', 'c0175926-78d2-4e18-987d-2d04948852d3':'Адель', '8d634c77-7a3b-4528-a7e6-107b7f7c97aa':'Аптека для лидчан', 'c268c0ac-0a28-4c13-9751-467bdc785687':'Дежурная аптека'}, trademarks:{'ff8c9678-1818-4745-a9ab-89359497003f':'торг. марка 1', '8b2bbea1-f012-45a8-8da0-0c55366ec92b':'торг. марка 2', '4fc87358-2ce1-47b7-a6bb-0c6852e339d2':'торг. марка 3'}, groups: {'a310f42a-9a3d-43bf-93d4-7ee551fdddca':'группа 1','dfe56dea-26d6-4b2f-b29e-da41484e60c6':'группа 2','1db15830-39cb-44f6-8256-18c026034813':'группа 3'}, subgroups: {'30977cda-6220-45f2-a3b3-30809cf93176':'подгруппа 1','97bad3e1-e9df-4cc6-97ee-6e392189abf2':'подгруппа 2','0afae615-d0e9-4d2d-b875-befb32701971':'подгруппа 3'}, providers: {'c35c9046-d7a4-438f-a71e-d62d5c5a21f7':'поставщик 1','3b882c02-c690-41f0-a4e4-2c60cd8c12aa':'поставщик 2','a9d41fdc-f2f1-4e32-944c-36abab43bbf0':'поставщик 3'}};
-	if(loadedfilters){
-		mssqlsettings.dispatch({type:'SYNC_ALL', payload: all, filters: loadedfilters});
-	} else {
-		mssqlsettings.dispatch({type:'SYNC_ALL', payload: all});
+function CyrilicDecoder(data){
+	try {
+		return decodeURI(data.toString()).toString();
+	} catch(e){
+		console.log('Error decode "' + data + '":' + e);
+		return data;
 	}
+}
+
+function loadDataFilters(loadedfilters){
+	let xmlhttp=new XMLHttpRequest();
+	xmlhttp.onreadystatechange=function() {
+		if (this.readyState==4 && this.status==200) {
+			if(loadedfilters){
+				mssqlsettings.dispatch({type:'SYNC_ALL', payload: JSON.parse(this.responseText), filters: loadedfilters});
+			} else {
+				mssqlsettings.dispatch({type:'SYNC_ALL', payload: JSON.parse(this.responseText)});
+			}
+		}
+	}
+	xmlhttp.open("POST","mssql-report.php",true);
+	xmlhttp.send();
 }
 
 //сохранение фильтров в localStorage
@@ -207,13 +269,10 @@ if(typeof(window.localStorage) !== 'undefined'){
 			console.log('window.localStorage["filters"] is not encode JSON String');
 			loadDataFilters();
 		}
-		mssqlsettings.subscribe(function(){
-			if(!_.isEqual(tempfilters, mssqlsettings.getState().filters)){
-				if(typeof(tempfilters) !== 'undefined'){
-					localStorage.setItem("filters", JSON.stringify(mssqlsettings.getState().filters));
-				} else if(!_.isEqual({}, mssqlsettings.getState().filters)){
-					localStorage.setItem("filters", JSON.stringify(mssqlsettings.getState().filters));
-				}
+		mssqlsettings.subscribe(function(){ 
+			if(JSON.stringify(tempfilters) === JSON.stringify(mssqlsettings.getState().filters)){ 
+				localStorage.setItem("filters", JSON.stringify(mssqlsettings.getState().filters));
+				tempfilters = mssqlsettings.getState().filters;
 			}
 		});
 	} catch(e){
@@ -270,6 +329,99 @@ class MyCalendar extends React.PureComponent{
 		);
 	}
 }
+
+//компонент фильтра для складов
+class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
+  
+	constructor(props, context){
+		super(props, context);
+		this.state = {
+			storecomponent: _.clone(mssqlsettings.getState().filter[_.clone(mssqlsettings.getState().tmp.typewh)]), //выбранные элементы
+			searchcomponent: _.clone(mssqlsettings.getState().tmp.search[_.clone(mssqlsettings.getState().tmp.typewh)]), //найденные элементы
+			searchstring: "", //строка поиска
+			typewh: _.clone(mssqlsettings.getState().tmp.typewh) //тип склада
+		};
+	}
+      
+	componentDidMount() {
+		let self = this;
+		mssqlsettings.subscribe(function(){ 
+			let tempsearchcomponent = _.clone(mssqlsettings.getState().tmp.search[_.clone(mssqlsettings.getState().tmp.typewh)]);
+			let tempstorecomponent = _.clone(mssqlsettings.getState().filter[_.clone(mssqlsettings.getState().tmp.typewh)]);
+			for(let i = 0; i < tempstorecomponent.length; i++){
+				if(tempsearchcomponent.indexOf(tempstorecomponent[i]) !== -1){
+					tempsearchcomponent.splice(tempsearchcomponent.indexOf(tempstorecomponent[i]), 1);
+				}
+			}
+			if(!((_.isEqual(self.state.storecomponent, tempstorecomponent)) && (_.isEqual(self.state.searchcomponent, tempsearchcomponent)) && (_.isEqual(self.state.searchstring, mssqlsettings.getState().tmp.searchstring[_.clone(mssqlsettings.getState().tmp.typewh)])) && (self.state.typewh === _.clone(mssqlsettings.getState().tmp.typewh)))){
+				self.setState({storecomponent: tempstorecomponent, searchcomponent: tempsearchcomponent, searchstring: _.clone(mssqlsettings.getState().tmp.searchstring[_.clone(mssqlsettings.getState().tmp.typewh)]), typewh: _.clone(mssqlsettings.getState().tmp.typewh)});
+			}
+		}); 
+	}
+	
+	onClickHandler(e){
+		var self = this;
+		let tempstorecomponent = _.clone(self.state.storecomponent);
+		switch(e.target.id){
+			case 'add':
+				if(tempstorecomponent.indexOf(e.target.name) === -1){
+					tempstorecomponent.push(e.target.name);
+				}
+				break;
+			case 'del':
+				console.log();
+				if(tempstorecomponent.indexOf(self.state.storecomponent[self.state.storecomponent.indexOf(e.target.name)]) !== -1){
+					tempstorecomponent.splice(tempstorecomponent.indexOf(self.state.storecomponent[self.state.storecomponent.indexOf(e.target.name)]), 1);
+				}
+				break;
+		}
+		mssqlsettings.dispatch({type:'SYNC_FILTER', payload:{storecomponent:tempstorecomponent}, filter:_.clone(mssqlsettings.getState().tmp.typewh)});
+	}
+	
+	onChangeHandler(e){
+		var self = this;
+		switch(e.target.name){
+			case 'searchstring':
+				mssqlsettings.dispatch({type:'SEARCH_FILTER', payload:{searchstring:e.target.value}, filter:_.clone(mssqlsettings.getState().tmp.typewh)});
+				break;
+			case 'typeWH':
+				mssqlsettings.dispatch({type:'SELECT_TYPE_WH', payload:{typewh:e.target.value}});
+				break;
+		}
+	}
+      
+  	render() {
+		let MsSqlReportPanelFilterComponents = new Array;
+		let MsSqlReportPanelFilterComponentsStore = new Array;
+		let MsSqlReportPanelFilterComponentsSearch = new Array;
+		
+		for(let i = 0; i < this.state.searchcomponent.length; i++){
+			MsSqlReportPanelFilterComponentsSearch.push(<div title={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][this.state.searchcomponent[i]])}><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='add' name={this.state.searchcomponent[i]} value={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][this.state.searchcomponent[i]])} /></div>);
+		}
+		
+		for(let i = 0; i < this.state.storecomponent.length; i++){
+			MsSqlReportPanelFilterComponentsStore.push(<div title={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][this.state.storecomponent[i]])}><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='del' name={this.state.storecomponent[i]} value={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][this.state.storecomponent[i]])} /></div>);
+		}
+		
+		let MsSqlReportPanelFilterComponentsSearchString = <input type="text" className="containerSearchInp" name="searchstring" onChange={this.onChangeHandler.bind(this)} value={this.state.searchstring} />;
+		let MsSqlReportPanelFilterComponentsTypeString =  new Array;
+		MsSqlReportPanelFilterComponentsTypeString.push(<option value="wh_retail" selected={(this.state.typewh === "wh_retail")?"selected":""}>Розничные склады</option>);
+		MsSqlReportPanelFilterComponentsTypeString.push(<option value="wh_wholesale" selected={(this.state.typewh === "wh_wholesale")?"selected":""}>Оптовые склады</option>);
+		MsSqlReportPanelFilterComponentsTypeString.push(<option value="warehouses" selected={(this.state.typewh === "warehouses")?"selected":""}>Все склады</option>);
+		
+		MsSqlReportPanelFilterComponents.push(<div className="containerSearchStringCustom">{MsSqlReportPanelFilterComponentsSearchString}</div>);
+		MsSqlReportPanelFilterComponents.push(<div className="containerTypeString"><select size="1" name="typeWH" className="containerTypeStringInp" onChange={this.onChangeHandler.bind(this)}> {MsSqlReportPanelFilterComponentsTypeString} </select></div>);
+		MsSqlReportPanelFilterComponents.push(<div className="containerSearch"><div>Позиции для отбора</div>{MsSqlReportPanelFilterComponentsSearch}</div>);
+		MsSqlReportPanelFilterComponents.push(<div className="containerFiltr"><div>Отобранные позиции</div>{MsSqlReportPanelFilterComponentsStore}</div>);
+			
+		return (
+			<div className={"container MsSqlReportPanelFilter" + _.clone(mssqlsettings.getState().tmp.typewh) + "Search"}>
+				<div className="containerName">{_.clone(mssqlsettings.getState().rusnames[_.clone(mssqlsettings.getState().tmp.typewh)])}</div>
+				{MsSqlReportPanelFilterComponents}
+			</div>
+		);
+	}
+};
 
 //компонент фильтра.
 class MsSqlReportPanelFilterComponents extends React.PureComponent{
@@ -333,11 +485,11 @@ class MsSqlReportPanelFilterComponents extends React.PureComponent{
 		let MsSqlReportPanelFilterComponentsSearch = new Array;
 		
 		for(let i = 0; i < this.state.searchcomponent.length; i++){
-			MsSqlReportPanelFilterComponentsSearch.push(<div><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='add' name={this.state.searchcomponent[i]} value={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.searchcomponent[i]])} /></div>);
+			MsSqlReportPanelFilterComponentsSearch.push(<div  title={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.searchcomponent[i]])}><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='add' name={this.state.searchcomponent[i]} value={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.searchcomponent[i]])} /></div>);
 		}
 		
 		for(let i = 0; i < this.state.storecomponent.length; i++){
-			MsSqlReportPanelFilterComponentsStore.push(<div><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='del' name={this.state.storecomponent[i]} value={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.storecomponent[i]])} /></div>);
+			MsSqlReportPanelFilterComponentsStore.push(<div  title={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.storecomponent[i]])}><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='del' name={this.state.storecomponent[i]} value={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.storecomponent[i]])} /></div>);
 		}
 		
 		let MsSqlReportPanelFilterComponentsSearchString = <input type="text" className="containerSearchInp" name="searchstring" onChange={this.onChangeHandler.bind(this)} value={this.state.searchstring} />;
@@ -356,12 +508,12 @@ class MsSqlReportPanelFilterComponents extends React.PureComponent{
 };
 
 //фильтры
-class MsSqlReportPanelFilter extends React.PureComponent{
+class MsSqlReportPanelFilter extends React.PureComponent{	
   	render() {
 		return (
 			<div className="MsSqlReportPanelFilter">
 				<div className="MsSqlReportPanelFilterLeft">
-					<MsSqlReportPanelFilterComponents data="warehouses" />
+					<MsSqlReportPanelFilterComponentsCustom />
 				</div>
 				<div className="MsSqlReportPanelFilterRight">
 					<MsSqlReportPanelFilterComponents data="trademarks" />
@@ -371,6 +523,12 @@ class MsSqlReportPanelFilter extends React.PureComponent{
 				</div>
 				<div className="MsSqlReportPanelFilterRight">
 					<MsSqlReportPanelFilterComponents data="subgroups" />
+				</div>
+				<div className="MsSqlReportPanelFilterLeft">
+					<MsSqlReportPanelFilterComponents data="bkgroups" />
+				</div>
+				<div className="MsSqlReportPanelFilterRight">
+					<MsSqlReportPanelFilterComponents data="producer" />
 				</div>
 				<div className="MsSqlReportPanelFilterCenter">
 					<MsSqlReportPanelFilterComponents data="providers" />
@@ -388,15 +546,16 @@ class MsSqlReportPanelSavedFilter extends React.PureComponent{
 		this.state = {
 			filters:_.clone(mssqlsettings.getState().filters),
 			filter:_.clone(mssqlsettings.getState().filter),
-			NameFilter:_.clone(mssqlsettings.getState().tmp.namefilter)
+			NameFilter:_.clone(mssqlsettings.getState().tmp.namefilter),
+			typewh:_.clone(mssqlsettings.getState().tmp.typewh)
 		};
     }
       
 	componentDidMount() {
 		var self = this;
 		mssqlsettings.subscribe(function(){ 
-			if(!((_.isEqual(self.state.filters, mssqlsettings.getState().filters)) && (_.isEqual(self.state.filter, mssqlsettings.getState().filter)) && ((self.state.NameFilter === mssqlsettings.getState().tmp.namefilter)))){
-				self.setState({filters: _.clone(mssqlsettings.getState().filters), filter: _.clone(mssqlsettings.getState().filter), NameFilter:_.clone(mssqlsettings.getState().tmp.namefilter)});
+			if(!((_.isEqual(self.state.filters, mssqlsettings.getState().filters)) && (_.isEqual(self.state.filter, mssqlsettings.getState().filter)) && ((self.state.NameFilter === mssqlsettings.getState().tmp.namefilter)) && ((self.state.typewh === mssqlsettings.getState().tmp.typewh)))){
+				self.setState({filters: _.clone(mssqlsettings.getState().filters), filter: _.clone(mssqlsettings.getState().filter), NameFilter:_.clone(mssqlsettings.getState().tmp.namefilter), typewh:_.clone(mssqlsettings.getState().tmp.typewh)});
 			}
 		});
 	}
@@ -431,7 +590,7 @@ class MsSqlReportPanelSavedFilter extends React.PureComponent{
 		let MsSqlReportPanelSavedFilter = new Array;
 		MsSqlReportPanelSavedFilter.push(<option value="">Фильтр не выбран</option>);
 		for(let j in this.state.filters) {
-			MsSqlReportPanelSavedFilter.push(<option value={j} selected={((_.isEqual(this.state.filters[j].filter, _.clone(mssqlsettings.getState().filter))) && ((this.state.filters[j].tmp.namefilter === _.clone(mssqlsettings.getState().tmp.namefilter))) && (j === this.state.NameFilter))?"selected":""}>{j}</option>);
+			MsSqlReportPanelSavedFilter.push(<option value={j} selected={((_.isEqual(this.state.filters[j].filter, _.clone(mssqlsettings.getState().filter))) && ((this.state.filters[j].tmp.namefilter === _.clone(mssqlsettings.getState().tmp.namefilter))) && ((this.state.filters[j].tmp.typewh === _.clone(mssqlsettings.getState().tmp.typewh))) && (j === this.state.NameFilter))?"selected":""}>{j}</option>);
 		}
 		
 		return (
