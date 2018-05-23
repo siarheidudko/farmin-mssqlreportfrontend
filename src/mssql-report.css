@@ -1,13 +1,55 @@
-﻿/* MsSqlReportPanelFilterComponents */
+﻿.TextWhite{
+	color: rgb(255, 255, 255);
+}
+.realButton {
+    background: #EFF2EB;
+    padding: 4px 10px;
+    margin: 0 6px;
+    outline: 0;
+    color: #000;
+    border: 0px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.2);
+    font-size: 12px;
+    text-decoration: none;
+    text-align: center;
+    -webkit-transition-duration: 0.25s;
+    -moz-transition-duration: 0.25s;
+    -o-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+    -webkit-transition-property: -webkit-transform;
+    -moz-transition-property: -moz-transform;
+    -o-transition-property: -o-transform;
+    transition: all 0.2s ease-out;
+}
+.realButton:hover{
+    background: rgba(0, 255, 0, 1);
+    cursor: pointer;
+}
+.realButton:active {
+	background: rgba(0, 255, 0, 0.1);
+}
+
+/* MsSqlReportPanel */
+.MsSqlPanelHeader{
+	z-index:1;
+	position: fixed;
+	background: rgba(0, 102, 255, 0.6);
+	width:100%;
+	padding-top: 20px;
+}
+
+/* MsSqlReportPanelFilterComponents */
 .container{
 	display:table;
 	align:center;
 	text-align:center;
 	width:660px;
 	font-family: 'Times New Roman', Times, serif;
+	margin: 10px;
 }
 .containerName{
 	font-family: 'Times New Roman', Times, serif;
+	font-size: 18px;
 	font-weight: bold;
     -webkit-user-select: none;
 	-moz-user-select: none;
@@ -19,6 +61,11 @@
 	margin: 10px;
 }
 .containerSearch, .containerFiltr{
+    -webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+}
+.containerSearchDiv, .containerFiltrDiv{
 	height: 200px;
     word-wrap: break-word;
     overflow-x: hidden;
@@ -51,9 +98,28 @@
 	font-style: italic;
 }
 
+/* MsSqlReportPanelFilterComponentsCustom */
+.containerSearchStringCustom{
+	float: left;
+	border: 1px ridge black;
+	width: 300px;
+	margin: 10px;
+}
+.containerTypeString {
+	display:table;
+	float: right;
+	width: 302px;
+	height:23px;
+	margin: 10px 0px;
+}
+.containerTypeStringInp{
+	border: 1px ridge black;
+}
+
 /* MsSqlReportPanelSavedFilter */
 .MsSqlReportPanelSavedFilter{
 	padding-bottom: 20px;
+	margin-left: 20px;
 }
 .MsSqlReportPanelSavedFilter div{
 	display:inline-block;
@@ -62,7 +128,10 @@
 /* MsSqlReportPanelFilter */
 .MsSqlReportPanelFilter{
 	display:table;
-	width: 1340px;
+	z-index:0;
+	padding-top: 140px;
+	width:100%;
+	max-width:1440px;
 }
 .MsSqlReportPanelFilterLeft{
 	clear:left;
@@ -72,8 +141,15 @@
 	clear:right;
 	float:right;
 }
-.MsSqlReportPanelFilterCenter{
-	clear:left;
-	float:left;
-	margin-left:330px;
+.MsSqlReportPanelFilterType1{
+	background: rgba(230, 230, 0, 0.3);
+}
+.MsSqlReportPanelFilterType2{
+	background: rgba(0, 255, 0, 0.3);
+}
+
+/* MyCalendar */
+.MyCalendar{
+	padding-bottom:10px;
+	text-align:center;
 }
