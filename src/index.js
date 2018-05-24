@@ -334,7 +334,7 @@ try {
 					try {
 						let tempfiltersstring = atob(this.responseText);
 						if(typeof(tempfiltersstring) === 'string'){
-							tempfilters = JSON.parse(tempfiltersstring);
+							tempfilters = JSON.parse(decodeURIComponent(escape(tempfiltersstring)));
 						}
 					} catch (e){
 						console.log(e);
@@ -387,7 +387,7 @@ try {
 			}
 			xmlhttpinc.open("POST","mssql-report.php",true);
 			xmlhttpinc.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-			xmlhttpinc.send('com=saveuserfilters&filters=' + btoa(JSON.stringify(mssqlsettings.getState().filters)));
+			xmlhttpinc.send('com=saveuserfilters&filters=' + btoa(unescape(encodeURIComponent(JSON.stringify(mssqlsettings.getState().filters)))));
 		}
 	});
 } catch(e){
