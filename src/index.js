@@ -358,7 +358,7 @@ function DateSQL(data){
 	return DateSQLSub(data.getFullYear()) + '-' + DateSQLSub((data.getMonth()+1)) + '-' + DateSQLSub(data.getDate());
 }
 
-//загрузка и сохранение фильтров в базу данных
+//загрузка фильтров из в базы данных
 try {
 	var tempfilters;
 	let xmlhttp=new XMLHttpRequest();
@@ -401,7 +401,7 @@ try {
 } catch(e){
 	console.log(e);
 	loadDataFilters();
-}
+} 
 
 /* VIEW */
 
