@@ -29,6 +29,69 @@
 	background: rgba(0, 255, 0, 0.1);
 }
 
+/* всплывающее  окно */
+.popup {
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.popup .popuptext {
+    width: 300px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 0;
+    position: fixed;
+    z-index: 2;
+	margin-top: 20%;
+    left: 50%;
+    margin-left: -150px;
+}
+.show {
+    visibility: visible;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+.unshow {
+    visibility: hidden;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+
+/* Curtain */
+.curtain{
+	width:100%;
+	height:100%;
+	z-index:99;
+	position:fixed;
+	left:5px;
+	top:5px;
+	right:5px;
+	bottom:5px;
+	background: rgba(0, 102, 255, 0.8);
+	-webkit-filter: blur(5px);
+	-moz-filter: blur(5px);
+	-o-filter: blur(5px);
+	-ms-filter: blur(5px);
+	filter: blur(5px);
+	text-align:center;
+}
+.Loading{
+	position:fixed;
+	margin-top:30%;
+	z-index:100;
+	left: 50%;
+	margin-left: -150px;
+}
+.LoadingText{
+	font-size:50px;
+	text-align:center;
+	width: 300px;
+}
+
 /* MsSqlReportPanel */
 .MsSqlPanelHeader{
 	z-index:1;
@@ -36,6 +99,11 @@
 	background: rgba(0, 102, 255, 0.6);
 	width:100%;
 	padding-top: 20px;
+}
+
+/* MsSqlPanelBody */
+.MsSqlPanelBody{
+	width:100%;
 }
 
 /* MsSqlReportPanelFilterComponents */
@@ -54,6 +122,7 @@
     -webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
+	
 }
 .containerSearchString, .containerSearch, .containerFiltr{
 	border: 1px ridge black;
@@ -99,6 +168,10 @@
 }
 
 /* MsSqlReportPanelFilterComponentsCustom */
+.containerSearchBlockCustom{
+	height: 41px;
+	overflow-y:hidden;
+}
 .containerSearchStringCustom{
 	float: left;
 	border: 1px ridge black;
@@ -129,9 +202,10 @@
 .MsSqlReportPanelFilter{
 	display:table;
 	z-index:0;
-	padding-top: 140px;
 	width:100%;
 	max-width:1440px;
+	margin: auto;
+	padding-top: 160px;
 }
 .MsSqlReportPanelFilterLeft{
 	clear:left;
@@ -146,6 +220,20 @@
 }
 .MsSqlReportPanelFilterType2{
 	background: rgba(0, 255, 0, 0.3);
+}
+.MsSqlReportPanelFilterMidleWidth{
+	width:1392px;
+	-webkit-transform-origin: left top;
+	-moz-transform-origin: left top;
+	-ms-transform-origin: left top;
+	-o-transform-origin: left top;
+	transform-origin: left top;
+	-webkit-transform:scale(0.8);
+	-moz-transform:scale(0.8);
+	-ms-transform:scale(0.8);
+	-o-transform:scale(0.8);
+	transform:scale(0.8);
+	padding-top: 180px;
 }
 
 /* MyCalendar */

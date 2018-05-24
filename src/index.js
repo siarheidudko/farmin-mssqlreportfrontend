@@ -100,7 +100,7 @@ function editmssqlsettings(state = {
 			wh_retail:'Фильтр по складу (розница)',
 			wh_wholesale:'Фильтр по складу (опт)',
 			trademarks:'Фильтр по торговой марке', 
-			bkgroups: 'Фильтр по группе Bookkeper',
+			bkgroups: 'Фильтр по группе ТМЦ',
 			groups: 'Фильтр по товарной группе', 
 			subgroups: 'Фильтр по товарной подгруппе', 
 			producer: 'Фильтр по производителю',
@@ -222,6 +222,9 @@ function editmssqlsettings(state = {
 				case 'MSG_POPUP':
 					var state_new = _.clone(state);
 					state_new.tmp.popuptext = action.payload.popuptext;
+					if(state_new.tmp.synccount === false){
+						state_new.tmp.synccount = true;
+					}
 					return state_new;
 					break;
 				default:
@@ -241,6 +244,7 @@ function mssqlgo(data){
 		}
 		data.start = DateSQL(data.start);
 		data.end = DateSQL(data.end);
+		let flag = true;
 		let xmlhttpinc=new XMLHttpRequest();
 		xmlhttpinc.onreadystatechange=function() {
 			if (this.readyState==4 && this.status==200) { 
@@ -255,6 +259,11 @@ function mssqlgo(data){
 				};
 			} else if(this.readyState==4){
 				popup('Сервер не отвечает!');
+			} else {
+				if(flag){
+					popup('Отчет запущен! Ожидайте...');
+					flag = false;
+				}
 			}
 		}
 		xmlhttpinc.open("POST","mssql-report.php",true);
@@ -582,8 +591,7 @@ class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
 		MsSqlReportPanelFilterComponentsTypeString.push(<option value="wh_wholesale" selected={(this.state.typewh === "wh_wholesale")?"selected":""}>Оптовые склады</option>);
 		MsSqlReportPanelFilterComponentsTypeString.push(<option value="warehouses" selected={(this.state.typewh === "warehouses")?"selected":""}>Все склады</option>);
 		
-		MsSqlReportPanelFilterComponents.push(<div className="containerSearchStringCustom">{MsSqlReportPanelFilterComponentsSearchString}</div>);
-		MsSqlReportPanelFilterComponents.push(<div className="containerTypeString"><select size="1" name="typeWH" className="containerTypeStringInp" onChange={this.onChangeHandler.bind(this)}> {MsSqlReportPanelFilterComponentsTypeString} </select></div>);
+		MsSqlReportPanelFilterComponents.push(<div className="containerSearchBlockCustom"><div className="containerSearchStringCustom">{MsSqlReportPanelFilterComponentsSearchString}</div><div className="containerTypeString"><select size="1" name="typeWH" className="containerTypeStringInp" onChange={this.onChangeHandler.bind(this)}> {MsSqlReportPanelFilterComponentsTypeString} </select></div></div>);
 		MsSqlReportPanelFilterComponents.push(<div className="containerSearch">Позиции для отбора<div className="containerSearchDiv">{MsSqlReportPanelFilterComponentsSearch}</div></div>);
 		MsSqlReportPanelFilterComponents.push(<div className="containerFiltr">Отобранные позиции<div className="containerFiltrDiv">{MsSqlReportPanelFilterComponentsStore}</div></div>);
 			
@@ -684,26 +692,26 @@ class MsSqlReportPanelFilterComponents extends React.PureComponent{
 class MsSqlReportPanelFilter extends React.PureComponent{	
   	render() {
 		return (
-			<div className="MsSqlReportPanelFilter">
+			<div className={((window.innerWidth > 1220) && (window.innerWidth < 1392))?"MsSqlReportPanelFilterMidleWidth MsSqlReportPanelFilter":"MsSqlReportPanelFilter"}>
 				<div className="MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1">
 					<MsSqlReportPanelFilterComponentsCustom />
 				</div>
 				<div className="MsSqlReportPanelFilterRight MsSqlReportPanelFilterType2">
 					<MsSqlReportPanelFilterComponents data="trademarks" />
 				</div>
-				<div className={(window.innerWidth > 1392)?"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType2":"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1"}>
+				<div className={(window.innerWidth > 1220)?"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType2":"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1"}>
 					<MsSqlReportPanelFilterComponents data="groups" />
 				</div>
-				<div className={(window.innerWidth > 1392)?"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType1":"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType2"}>
+				<div className={(window.innerWidth > 1220)?"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType1":"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType2"}>
 					<MsSqlReportPanelFilterComponents data="subgroups" />
 				</div>
-				<div className={(window.innerWidth > 1392)?"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1":"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1"}>
+				<div className={(window.innerWidth > 1220)?"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1":"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1"}>
 					<MsSqlReportPanelFilterComponents data="bkgroups" />
 				</div>
-				<div className={(window.innerWidth > 1392)?"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType2":"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType2"}>
+				<div className={(window.innerWidth > 1220)?"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType2":"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType2"}>
 					<MsSqlReportPanelFilterComponents data="producer" />
 				</div>
-				<div className={(window.innerWidth > 1392)?"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType2":"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1"}>
+				<div className={(window.innerWidth > 1220)?"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType2":"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1"}>
 					<MsSqlReportPanelFilterComponents data="providers" />
 				</div>
 			</div>

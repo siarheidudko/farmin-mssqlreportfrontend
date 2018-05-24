@@ -122,6 +122,7 @@
     -webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
+	
 }
 .containerSearchString, .containerSearch, .containerFiltr{
 	border: 1px ridge black;
@@ -167,6 +168,10 @@
 }
 
 /* MsSqlReportPanelFilterComponentsCustom */
+.containerSearchBlockCustom{
+	height: 41px;
+	overflow-y:hidden;
+}
 .containerSearchStringCustom{
 	float: left;
 	border: 1px ridge black;
@@ -197,10 +202,10 @@
 .MsSqlReportPanelFilter{
 	display:table;
 	z-index:0;
-	padding-top: 160px;
 	width:100%;
 	max-width:1440px;
 	margin: auto;
+	padding-top: 160px;
 }
 .MsSqlReportPanelFilterLeft{
 	clear:left;
@@ -215,6 +220,20 @@
 }
 .MsSqlReportPanelFilterType2{
 	background: rgba(0, 255, 0, 0.3);
+}
+.MsSqlReportPanelFilterMidleWidth{
+	width:1392px;
+	-webkit-transform-origin: left top;
+	-moz-transform-origin: left top;
+	-ms-transform-origin: left top;
+	-o-transform-origin: left top;
+	transform-origin: left top;
+	-webkit-transform:scale(0.8);
+	-moz-transform:scale(0.8);
+	-ms-transform:scale(0.8);
+	-o-transform:scale(0.8);
+	transform:scale(0.8);
+	padding-top: 180px;
 }
 
 /* MyCalendar */
