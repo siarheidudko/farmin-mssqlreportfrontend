@@ -284,6 +284,37 @@ function CyrilicDecoder(data){
 	}
 }
 
+//подписка на обновления фильтров
+function FiltersOnEdit(){
+	mssqlsettings.subscribe(function(){ 
+		if(!(_.isEqual(tempfilters, mssqlsettings.getState().filters))){
+			let xmlhttpinc=new XMLHttpRequest();
+			xmlhttpinc.onreadystatechange=function() {
+				if (this.readyState==4 && this.status==200) {
+					if(this.responseText.substr(0,5) !== 'error'){
+						popup('Фильтры изменены!');
+						tempfilters = _.clone(mssqlsettings.getState().filters);
+					} else {
+						if(this.responseText.substr(4) !== ''){
+							popup(this.responseText.substr(4));
+							tempfilters = _.clone(mssqlsettings.getState().filters);
+						} else {
+							popup('Не могу сохранить фильтры!');
+							tempfilters = _.clone(mssqlsettings.getState().filters);
+						}
+					}
+				} else if(this.readyState==4) {
+					popup('Не могу сохранить фильтры, сервер не отвечает!');
+					tempfilters = _.clone(mssqlsettings.getState().filters);
+				}
+			}
+			xmlhttpinc.open("POST","mssql-report.php",true);
+			xmlhttpinc.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			xmlhttpinc.send('com=saveuserfilters&filters=' + btoa(unescape(encodeURIComponent(JSON.stringify(mssqlsettings.getState().filters)))));
+		}
+	});
+}
+
 //загрузка фильтров
 function loadDataFilters(loadedfilters){
 	let xmlhttpinc=new XMLHttpRequest();
@@ -292,14 +323,18 @@ function loadDataFilters(loadedfilters){
 			try{
 				if(loadedfilters){
 					mssqlsettings.dispatch({type:'SYNC_ALL', payload: JSON.parse(this.responseText), filters: loadedfilters});
+					FiltersOnEdit();
 				} else {
 					mssqlsettings.dispatch({type:'SYNC_ALL', payload: JSON.parse(this.responseText)});
+					FiltersOnEdit();
 				}
 			} catch(e){
 				popup(e);
+				FiltersOnEdit();
 			}
 		} else if(this.readyState==4) {
 			popup('Не могу загрузить фильтры!');
+			FiltersOnEdit();
 		}
 	}
 	xmlhttpinc.open("POST","mssql-report.php",true);
@@ -363,33 +398,6 @@ try {
 	xmlhttp.open("POST","mssql-report.php",true);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlhttp.send('com=loaduserfilters');
-	mssqlsettings.subscribe(function(){ 
-		if(!(_.isEqual(tempfilters, mssqlsettings.getState().filters))){
-			let xmlhttpinc=new XMLHttpRequest();
-			xmlhttpinc.onreadystatechange=function() {
-				if (this.readyState==4 && this.status==200) {
-					if(this.responseText.substr(0,5) !== 'error'){
-						popup('Фильтры изменены!');
-						tempfilters = _.clone(mssqlsettings.getState().filters);
-					} else {
-						if(this.responseText.substr(4) !== ''){
-							popup(this.responseText.substr(4));
-							tempfilters = _.clone(mssqlsettings.getState().filters);
-						} else {
-							popup('Не могу сохранить фильтры!');
-							tempfilters = _.clone(mssqlsettings.getState().filters);
-						}
-					}
-				} else if(this.readyState==4) {
-					popup('Не могу сохранить фильтры, сервер не отвечает!');
-					tempfilters = _.clone(mssqlsettings.getState().filters);
-				}
-			}
-			xmlhttpinc.open("POST","mssql-report.php",true);
-			xmlhttpinc.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-			xmlhttpinc.send('com=saveuserfilters&filters=' + btoa(unescape(encodeURIComponent(JSON.stringify(mssqlsettings.getState().filters)))));
-		}
-	});
 } catch(e){
 	console.log(e);
 	loadDataFilters();
