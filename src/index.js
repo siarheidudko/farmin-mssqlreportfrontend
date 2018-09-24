@@ -1,4 +1,4 @@
-/** MsSql Report v1.0.0
+/** MsSql Report v1.0.1
  * mssql-report.js
  *
  * Copyright (c) 2018-present, 
@@ -248,6 +248,7 @@ function mssqlgo(data){
 		let xmlhttpinc=new XMLHttpRequest();
 		xmlhttpinc.onreadystatechange=function() {
 			if (this.readyState==4 && this.status==200) { 
+			/*	будем слать уведомление через FCM
 				var textNotification = new Notification("Отчет MSSQL", {
 					body : "Ваш отчет успешно сформирован и находится в папке загрузки!",
 					icon : "../images/menu/mssql.png"
@@ -256,7 +257,7 @@ function mssqlgo(data){
 				textNotification.onclick = function() {
 					window.open(answerlink);
 					textNotification.close();
-				};
+				}; */
 			} else if(this.readyState==4){
 				popup('Сервер не отвечает!');
 			} else {
@@ -420,11 +421,12 @@ class Curtain extends React.PureComponent{
       
 	componentDidMount() {
 		var self = this;
-		mssqlsettings.subscribe(function(){
+		var cancel = mssqlsettings.subscribe(function(){
 			if(!(_.isEqual(self.state.synccount, mssqlsettings.getState().tmp.synccount))){
 				self.setState({synccount: _.clone(mssqlsettings.getState().tmp.synccount)});
 			}
 		});
+		this.componentWillUnmount = cancel;
 	}
       
   	render() {
@@ -439,7 +441,7 @@ class Curtain extends React.PureComponent{
 	}
 };
 
-//высплывающее уведомление
+//всплывающее уведомление
 class MyPopup extends React.PureComponent{
   
    constructor(props, context) {
@@ -452,7 +454,7 @@ class MyPopup extends React.PureComponent{
       
 	componentDidMount() {
 		var self = this;
-		mssqlsettings.subscribe(function(){
+		var cancel = mssqlsettings.subscribe(function(){
 			if(!(_.isEqual(self.state.PopupText, mssqlsettings.getState().tmp.popuptext))){
 				self.setState({PopupText: _.clone(mssqlsettings.getState().tmp.popuptext)});
 				if(mssqlsettings.getState().tmp.popuptext !== ''){
@@ -460,6 +462,7 @@ class MyPopup extends React.PureComponent{
 				}
 			}
 		});
+		this.componentWillUnmount = cancel;
 	}
       
   	onDivClickHandler(e) {
@@ -499,11 +502,12 @@ class MyCalendar extends React.PureComponent{
       
 	componentDidMount() {
 		var self = this;
-		mssqlsettings.subscribe(function(){ 
+		var cancel = mssqlsettings.subscribe(function(){ 
 			if(!((_.isEqual(self.state.startdate, mssqlsettings.getState().tmp.startdate)) && (_.isEqual(self.state.enddate, mssqlsettings.getState().tmp.enddate)))){
 				self.setState({startdate: _.clone(mssqlsettings.getState().tmp.startdate), enddate: _.clone(mssqlsettings.getState().tmp.enddate)});
 			}
 		});
+		this.componentWillUnmount = cancel;
 	}
 	
 	render(){
@@ -535,7 +539,7 @@ class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
       
 	componentDidMount() {
 		let self = this;
-		mssqlsettings.subscribe(function(){ 
+		var cancel = mssqlsettings.subscribe(function(){ 
 			let tempsearchcomponent = _.clone(mssqlsettings.getState().tmp.search[_.clone(mssqlsettings.getState().tmp.typewh)]);
 			let tempstorecomponent = _.clone(mssqlsettings.getState().filter[_.clone(mssqlsettings.getState().tmp.typewh)]);
 			for(let i = 0; i < tempstorecomponent.length; i++){
@@ -547,6 +551,7 @@ class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
 				self.setState({storecomponent: tempstorecomponent, searchcomponent: tempsearchcomponent, searchstring: _.clone(mssqlsettings.getState().tmp.searchstring[_.clone(mssqlsettings.getState().tmp.typewh)]), typewh: _.clone(mssqlsettings.getState().tmp.typewh)});
 			}
 		}); 
+		this.componentWillUnmount = cancel;
 	}
 	
 	onClickHandler(e){
@@ -626,7 +631,7 @@ class MsSqlReportPanelFilterComponents extends React.PureComponent{
       
 	componentDidMount() {
 		let self = this;
-		mssqlsettings.subscribe(function(){ 
+		var cancel = mssqlsettings.subscribe(function(){ 
 			let tempsearchcomponent = _.clone(mssqlsettings.getState().tmp.search[self.props.data]);
 			let tempstorecomponent = _.clone(mssqlsettings.getState().filter[self.props.data]);
 			for(let i = 0; i < tempstorecomponent.length; i++){
@@ -638,6 +643,7 @@ class MsSqlReportPanelFilterComponents extends React.PureComponent{
 				self.setState({storecomponent: tempstorecomponent, searchcomponent: tempsearchcomponent, searchstring: _.clone(mssqlsettings.getState().tmp.searchstring[self.props.data])});
 			}
 		}); 
+		this.componentWillUnmount = cancel;
 	}
 	
 	onClickHandler(e){
@@ -742,11 +748,12 @@ class MsSqlReportPanelSavedFilter extends React.PureComponent{
       
 	componentDidMount() {
 		var self = this;
-		mssqlsettings.subscribe(function(){ 
+		var cancel = mssqlsettings.subscribe(function(){ 
 			if(!((_.isEqual(self.state.filters, mssqlsettings.getState().filters)) && (_.isEqual(self.state.filter, mssqlsettings.getState().filter)) && ((self.state.NameFilter === mssqlsettings.getState().tmp.namefilter)) && ((self.state.typewh === mssqlsettings.getState().tmp.typewh)))){
 				self.setState({filters: _.clone(mssqlsettings.getState().filters), filter: _.clone(mssqlsettings.getState().filter), NameFilter:_.clone(mssqlsettings.getState().tmp.namefilter), typewh:_.clone(mssqlsettings.getState().tmp.typewh)});
 			}
 		});
+		this.componentWillUnmount = cancel;
 	}
 	
 	onChangeHandler(e){
