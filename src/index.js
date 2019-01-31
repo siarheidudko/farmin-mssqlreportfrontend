@@ -18,7 +18,10 @@ import MomentLocaleUtils, {formatDate,parseDate} from 'react-day-picker/moment';
 
 /* CORE */
 
+var tempfilters;
+
 var mssqlsettings = createStore(editmssqlsettings, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+window.mssqlsettings = mssqlsettings;
 function editmssqlsettings(state = {
 		filters:{},
 		filter:{
@@ -361,7 +364,6 @@ function DateSQL(data){
 
 //загрузка фильтров из в базы данных
 try {
-	var tempfilters;
 	let xmlhttp=new XMLHttpRequest();
 	xmlhttp.onreadystatechange=function() {
 		if (this.readyState==4 && this.status==200) {
@@ -378,7 +380,7 @@ try {
 					if(typeof(tempfilters) === 'object'){
 						loadDataFilters(_.clone(tempfilters));
 					} else {
-						console.log('Loaded filters is not encode JSON String');
+						console.warn('Loaded filters is not encode JSON String');
 						loadDataFilters();
 					}
 				} else {
