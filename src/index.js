@@ -115,7 +115,11 @@ function editmssqlsettings(state = {
 			let state_new = _.clone(state);
 			switch (action.type){
 				case 'SYNC_ALL':
+					state_new.all['warehouses'] = [];
+					state_new.tmp.search['warehouses'] = [];
 					for(const type in action.payload){
+						state_new.all[type] = [];
+						state_new.tmp.search[type] = [];
 						for(const uid in action.payload[type]){
 							state_new.all[type].push(uid);
 							state_new.tmp.search[type].push(uid);
@@ -129,6 +133,7 @@ function editmssqlsettings(state = {
 								state_new.uids['warehouses'][uid] = realname;
 							}
 						}
+						
 					}
 					if(typeof(action.filters) === 'object'){
 						state_new.filters = action.filters;
