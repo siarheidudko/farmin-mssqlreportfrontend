@@ -18,10 +18,11 @@ import MomentLocaleUtils, {formatDate,parseDate} from 'react-day-picker/moment';
 
 /* CORE */
 
-var tempfilters;
+let tempfilters;
 
-var mssqlsettings = createStore(editmssqlsettings, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
-window.mssqlsettings = mssqlsettings;
+let mssqlsettings = createStore(editmssqlsettings);
+//window.mssqlsettings = mssqlsettings;
+
 function editmssqlsettings(state = {
 		filters:{},
 		filter:{
@@ -111,20 +112,20 @@ function editmssqlsettings(state = {
 		}
 	}, action){
 		try {
+			let state_new = _.clone(state);
 			switch (action.type){
 				case 'SYNC_ALL':
-					var state_new = _.clone(state);
-					for(let type in action.payload){
-						for(let uid in action.payload[type]){
-							state_new.all[type].push(_.clone(uid));
-							state_new.tmp.search[type].push(_.clone(uid));
+					for(const type in action.payload){
+						for(const uid in action.payload[type]){
+							state_new.all[type].push(uid);
+							state_new.tmp.search[type].push(uid);
 							let realname = CyrilicDecoder(action.payload[type][uid]);
-							state_new.uidssearch[type][uid] = _.clone(realname.toUpperCase());
+							state_new.uidssearch[type][uid] = realname.toUpperCase();
 							state_new.uids[type][uid] = realname;
 							if((type === 'wh_retail') || (type === 'wh_wholesale')){
-								state_new.all['warehouses'].push(_.clone(uid));
-								state_new.tmp.search['warehouses'].push(_.clone(uid));
-								state_new.uidssearch['warehouses'][uid] = _.clone(realname.toUpperCase());
+								state_new.all['warehouses'].push(uid);
+								state_new.tmp.search['warehouses'].push(uid);
+								state_new.uidssearch['warehouses'][uid] = realname.toUpperCase();
 								state_new.uids['warehouses'][uid] = realname;
 							}
 						}
@@ -136,18 +137,16 @@ function editmssqlsettings(state = {
 					return state_new;
 					break;
 				case 'SYNC_FILTER':
-					var state_new = _.clone(state);
 					state_new.filter[action.filter] = _.clone(action.payload.storecomponent);
 					return state_new;
 					break;
 				case 'CLEAR_FILTER':
-					var state_new = _.clone(state);
-					for(let keyfilter in state_new.filter){
-						state_new.filter[_.clone(keyfilter)] = [];
+					for(const keyfilter in state_new.filter){
+						state_new.filter[keyfilter] = [];
 					}
 					state_new.tmp.search = _.clone(state_new.all);
-					for(let keysearchstring in state_new.tmp.searchstring){
-						state_new.tmp.searchstring[_.clone(keysearchstring)] = "";
+					for(const keysearchstring in state_new.tmp.searchstring){
+						state_new.tmp.searchstring[keysearchstring] = "";
 					}
 					state_new.tmp.startdate = new Date();
 					state_new.tmp.enddate = new Date();
@@ -157,13 +156,12 @@ function editmssqlsettings(state = {
 					return state_new;
 					break;
 				case 'SEARCH_FILTER':
-					var state_new = _.clone(state);
 					state_new.tmp.searchstring[action.filter] = _.clone(action.payload.searchstring);
 					state_new.tmp.search[action.filter] = [];
 					if(action.payload.searchstring.length > 1){
 						for(let i = 0; i < state_new.all[action.filter].length; i++){
 							if(state_new.uidssearch[action.filter][state_new.all[action.filter][i]].indexOf(action.payload.searchstring.toUpperCase()) !== -1){
-								state_new.tmp.search[action.filter].push(_.clone(state_new.all[action.filter][i]));
+								state_new.tmp.search[action.filter].push(state_new.all[action.filter][i]);
 							}
 						}
 					} else {
@@ -172,38 +170,33 @@ function editmssqlsettings(state = {
 					return state_new;
 					break;
 				case 'SELECT_FILTER':
-					var state_new = _.clone(state);
 					state_new.filter = _.clone(state.filters[action.payload.filter].filter);
-					state_new.tmp.namefilter = _.clone(state.filters[action.payload.filter].tmp.namefilter);
-					state_new.tmp.typewh = _.clone(state.filters[action.payload.filter].tmp.typewh);
-					for(let keysearchstring in state_new.tmp.searchstring){
-						state_new.tmp.searchstring[_.clone(keysearchstring)] = "";
+					state_new.tmp.namefilter = state.filters[action.payload.filter].tmp.namefilter;
+					state_new.tmp.typewh = state.filters[action.payload.filter].tmp.typewh;
+					for(const keysearchstring in state_new.tmp.searchstring){
+						state_new.tmp.searchstring[keysearchstring] = "";
 					}
 					state_new.tmp.search[action.payload.filter] = _.clone(state_new.all[action.payload.filter]);
 					state_new.tmp.popuptext = "Выбран фильтр \n" + state_new.tmp.namefilter;
 					return state_new;
 					break;
 				case 'EDIT_NAME_FILTER':
-					var state_new = _.clone(state);
-					state_new.tmp.namefilter = _.clone(action.payload.namefilter);
+					state_new.tmp.namefilter = action.payload.namefilter;
 					return state_new;
 					break;
 				case 'SAVE_FILTER':
-					var state_new = _.clone(state);
 					state_new.filters[state_new.tmp.namefilter] = {};
 					state_new.filters[state_new.tmp.namefilter].tmp = {};
-					state_new.filters[state_new.tmp.namefilter].tmp.namefilter = _.clone(state.tmp.namefilter);
-					state_new.filters[state_new.tmp.namefilter].tmp.typewh = _.clone(state.tmp.typewh);
+					state_new.filters[state_new.tmp.namefilter].tmp.namefilter = state.tmp.namefilter;
+					state_new.filters[state_new.tmp.namefilter].tmp.typewh = state.tmp.typewh;
 					state_new.filters[state_new.tmp.namefilter].filter = _.clone(state.filter);
 					return state_new;
 					break;
 				case 'DELETE_FILTER':
-					var state_new = _.clone(state);
 					delete state_new.filters[state_new.tmp.namefilter];
 					return state_new;
 					break;
 				case 'EDIT_DATE':
-					var state_new = _.clone(state);
 					switch(action.payload.type){
 						case 'startdate':
 							state_new.tmp.startdate = action.payload.date;
@@ -215,7 +208,6 @@ function editmssqlsettings(state = {
 					return state_new;
 					break;
 				case 'SELECT_TYPE_WH':
-					var state_new = _.clone(state);
 					state_new.tmp.typewh = action.payload.typewh;
 					state_new.filter.warehouses = []; //очищаем список выбранных складов
 					state_new.filter.wh_retail = []; 
@@ -223,7 +215,6 @@ function editmssqlsettings(state = {
 					return state_new;
 					break;
 				case 'MSG_POPUP':
-					var state_new = _.clone(state);
 					state_new.tmp.popuptext = action.payload.popuptext;
 					if(state_new.tmp.synccount === false){
 						state_new.tmp.synccount = true;
@@ -231,6 +222,7 @@ function editmssqlsettings(state = {
 					return state_new;
 					break;
 				default:
+					return state_new;
 					break;
 			}
 		} catch(e){
@@ -252,7 +244,7 @@ function mssqlgo(data){
 		xmlhttpinc.onreadystatechange=function() {
 			if (this.readyState==4 && this.status==200) { 
 			/*	будем слать уведомление через FCM
-				var textNotification = new Notification("Отчет MSSQL", {
+				let textNotification = new Notification("Отчет MSSQL", {
 					body : "Ваш отчет успешно сформирован и находится в папке загрузки!",
 					icon : "../images/menu/mssql.png"
 				});
@@ -290,6 +282,7 @@ function CyrilicDecoder(data){
 
 //подписка на обновления фильтров
 function FiltersOnEdit(){
+	console.log("Загрузка выполнена.");
 	mssqlsettings.subscribe(function(){ 
 		if(!(_.isEqual(tempfilters, mssqlsettings.getState().filters))){
 			let xmlhttpinc=new XMLHttpRequest();
@@ -314,7 +307,7 @@ function FiltersOnEdit(){
 			}
 			xmlhttpinc.open("POST","mssql-report.php",true);
 			xmlhttpinc.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-			xmlhttpinc.send('com=saveuserfilters&filters=' + btoa(unescape(encodeURIComponent(JSON.stringify(mssqlsettings.getState().filters)))));
+			xmlhttpinc.send('com=saveuserfilters&filters=' + JSON.stringify(mssqlsettings.getState().filters));
 		}
 	});
 }
@@ -362,49 +355,105 @@ function DateSQL(data){
 	return DateSQLSub(data.getFullYear()) + '-' + DateSQLSub((data.getMonth()+1)) + '-' + DateSQLSub(data.getDate());
 }
 
-//загрузка фильтров из в базы данных
-try {
-	let xmlhttp=new XMLHttpRequest();
-	xmlhttp.onreadystatechange=function() {
-		if (this.readyState==4 && this.status==200) {
-			if(this.responseText !== 'null'){
-				if(this.responseText.substr(0,5) !== 'error'){
-					try {
-						let tempfiltersstring = atob(this.responseText);
-						if(typeof(tempfiltersstring) === 'string'){
-							tempfilters = JSON.parse(decodeURIComponent(escape(tempfiltersstring)));
+//загрузка фильтров из в базы данных (запуск без кэша)
+function startOnDbRequest(){
+	console.log("Загрузка из БД.");
+	try {
+		let xmlhttp=new XMLHttpRequest();
+		xmlhttp.onreadystatechange=function() {
+			if (this.readyState==4 && this.status==200) {
+				if(this.responseText !== 'null'){
+					if(this.responseText.substr(0,5) !== 'error'){
+						try {
+							let tempfiltersstring = this.responseText;
+							if(typeof(tempfiltersstring) === 'string'){
+								tempfilters = JSON.parse(tempfiltersstring);
+							}
+						} catch (e){
+							console.error(e);
 						}
-					} catch (e){
-						console.log(e);
-					}
-					if(typeof(tempfilters) === 'object'){
-						loadDataFilters(_.clone(tempfilters));
+						if(typeof(tempfilters) === 'object'){
+							loadDataFilters(_.clone(tempfilters));
+						} else {
+							console.warn('Loaded filters is not encode JSON String');
+							loadDataFilters();
+						}
 					} else {
-						console.warn('Loaded filters is not encode JSON String');
+						if(this.responseText.substr(4) !== ''){
+							popup(this.responseText.substr(4));
+						} else {
+							popup('Не могу загрузить сохраненные фильтры!');
+						}
 						loadDataFilters();
 					}
 				} else {
-					if(this.responseText.substr(4) !== ''){
-						popup(this.responseText.substr(4));
-					} else {
-						popup('Не могу загрузить сохраненные фильтры!');
-					}
 					loadDataFilters();
 				}
-			} else {
-				loadDataFilters();
+			} else if(this.readyState==4) {
+				popup('Не могу загрузить сохраненные фильтры!');
 			}
-		} else if(this.readyState==4) {
-			popup('Не могу загрузить сохраненные фильтры!');
 		}
-	}
-	xmlhttp.open("POST","mssql-report.php",true);
-	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	xmlhttp.send('com=loaduserfilters');
-} catch(e){
-	console.log(e);
-	loadDataFilters();
-} 
+		xmlhttp.open("POST","mssql-report.php",true);
+		xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		xmlhttp.send('com=loaduserfilters');
+	} catch(e){
+		console.log(e);
+		loadDataFilters();
+	} 
+}
+
+//запуск с кэшем
+function startOnChache(){
+	console.log("Предзагрузка из кэша.");
+	let synclocalstorage = false;
+	(new Promise(function(resolve, reject){
+		if(localStorage){
+			let _subscriber = function(){
+				mssqlsettings.subscribe(function(){
+					if(synclocalstorage === false){
+						setTimeout(function(){
+							synclocalstorage = false;
+							let _upditem = JSON.stringify(mssqlsettings.getState());
+							localStorage.setItem('mssqlreportnew', _upditem);
+							synclocalstorage = false;
+						}, 10000);
+					}
+				});
+			}
+			let _item = localStorage.getItem('mssqlreportnew'); 
+			if(typeof(_item) === 'string'){
+				try{
+					let mystore = JSON.parse(_item);
+					_item = null;
+					if(typeof(mystore.filters) === 'object'){
+						mssqlsettings.dispatch({type:'SYNC_ALL', payload: mystore.uids, filters: mystore.filters});
+					} else {
+						mssqlsettings.dispatch({type:'SYNC_ALL', payload: mystore.uids});
+					}
+					setTimeout(function(){
+						mystore = null;
+					}, 1000);
+					setTimeout(resolve, 1500, true);
+					_subscriber();
+				}catch(err){
+					_subscriber();
+					reject(err);
+				}
+			} else {
+				_subscriber();
+				resolve(true);
+			}
+		} else {
+			resolve(true);
+		}
+	})).catch(function(err){
+		console.error(err);
+	}).finally(function(){
+		startOnDbRequest();
+	});
+}
+
+startOnChache();
 
 /* VIEW */
 
@@ -413,50 +462,49 @@ try {
 
 //занавес перед загрузкой
 class Curtain extends React.PureComponent{
-  
-   constructor(props, context) {
-      super(props, context);
-      this.state = {
-        synccount: _.clone(mssqlsettings.getState().tmp.synccount),
-      };
+	constructor(props, context) {
+		super(props, context);
+		this.state = {
+			synccount: _.clone(mssqlsettings.getState().tmp.synccount),
+		};
     }
       
 	componentDidMount() {
-		var self = this;
-		var cancel = mssqlsettings.subscribe(function(){
+		let self = this;
+		let cancel = mssqlsettings.subscribe(function(){
 			if(!(_.isEqual(self.state.synccount, mssqlsettings.getState().tmp.synccount))){
 				self.setState({synccount: _.clone(mssqlsettings.getState().tmp.synccount)});
 			}
 		});
-		this.componentWillUnmount = cancel;
+		self.componentWillUnmount = cancel;
 	}
       
   	render() {
-      return (
-		<div>
-			<div className={(this.state.synccount)?"curtain unshow":"curtain show"} />
-			<div className={(this.state.synccount)?"Loading unshow":"Loading show"}>
-				<text className="TextWhite LoadingText">Загрузка...</text>
+		let self = this;
+		return (
+			<div>
+				<div className={(self.state.synccount)?"curtain unshow":"curtain show"} />
+				<div className={(self.state.synccount)?"Loading unshow":"Loading show"}>
+					<text className="TextWhite LoadingText">Загрузка...</text>
+				</div>
 			</div>
-		</div>
-      );
+		);
 	}
 };
 
 //всплывающее уведомление
 class MyPopup extends React.PureComponent{
-  
-   constructor(props, context) {
-      super(props, context);
-      this.state = {
-        PopupText: _.clone(mssqlsettings.getState().tmp.popuptext),
-      };
-      this.onDivClickHandler = this.onDivClickHandler.bind(this);
-    }
+	constructor(props, context) {
+		super(props, context);
+		this.state = {
+			PopupText: _.clone(mssqlsettings.getState().tmp.popuptext),
+		};
+		this.onDivClickHandler = this.onDivClickHandler.bind(this);
+	}
       
 	componentDidMount() {
-		var self = this;
-		var cancel = mssqlsettings.subscribe(function(){
+		let self = this;
+		let cancel = mssqlsettings.subscribe(function(){
 			if(!(_.isEqual(self.state.PopupText, mssqlsettings.getState().tmp.popuptext))){
 				self.setState({PopupText: _.clone(mssqlsettings.getState().tmp.popuptext)});
 				if(mssqlsettings.getState().tmp.popuptext !== ''){
@@ -464,25 +512,26 @@ class MyPopup extends React.PureComponent{
 				}
 			}
 		});
-		this.componentWillUnmount = cancel;
+		self.componentWillUnmount = cancel;
 	}
       
   	onDivClickHandler(e) {
-		this.setState({PopupText: ''});
+		let self = this;
+		self.setState({PopupText: ''});
 	}
       
   	render() {
-      return (
-        <div className={(this.state.PopupText == "")?"popup unshow":"popup show"} onClick={this.onDivClickHandler}>
-  			<span className="popuptext" id="myPopup">{this.state.PopupText}</span>
-        </div>
-      );
+		let self = this;
+		return (
+			<div className={(self.state.PopupText == "")?"popup unshow":"popup show"} onClick={self.onDivClickHandler}>
+				<span className="popuptext" id="myPopup">{self.state.PopupText}</span>
+			</div>
+		);
 	}
 };
 
 //подключаю календарь
 class MyCalendar extends React.PureComponent{
-	
 	constructor(props, context){
 		super(props, context);
 		this.state = {
@@ -492,6 +541,7 @@ class MyCalendar extends React.PureComponent{
     }
 	
 	onBtnClickHandler(e){
+		let self = this;
 		switch(e.target.id){
 			case 'submit':
 				mssqlgo( {start : _.clone(mssqlsettings.getState().tmp.startdate), end : _.clone(mssqlsettings.getState().tmp.enddate), filter : _.clone(mssqlsettings.getState().filter), typewh: _.clone(mssqlsettings.getState().tmp.typewh)} );
@@ -503,24 +553,24 @@ class MyCalendar extends React.PureComponent{
 	}
       
 	componentDidMount() {
-		var self = this;
-		var cancel = mssqlsettings.subscribe(function(){ 
+		let self = this;
+		let cancel = mssqlsettings.subscribe(function(){ 
 			if(!((_.isEqual(self.state.startdate, mssqlsettings.getState().tmp.startdate)) && (_.isEqual(self.state.enddate, mssqlsettings.getState().tmp.enddate)))){
 				self.setState({startdate: _.clone(mssqlsettings.getState().tmp.startdate), enddate: _.clone(mssqlsettings.getState().tmp.enddate)});
 			}
 		});
-		this.componentWillUnmount = cancel;
+		self.componentWillUnmount = cancel;
 	}
 	
 	render(){
-		var self = this;
+		let self = this;
 		return(
 			<div className="MyCalendar">
 				<DayPickerInput formatDate={formatDate} parseDate={parseDate} format="DD.MM.YYYY" placeholder={`${formatDate(self.state.startdate, 'DD.MM.YYYY', 'ru')}`} value={self.state.startdate} dayPickerProps={{locale: 'ru', localeUtils: MomentLocaleUtils,}} onDayChange={day => mssqlsettings.dispatch({type:'EDIT_DATE', payload:{date:_.clone(day), type:'startdate'}})} />
 				<text className="TextWhite">&#8195;-&#8195;</text>
 				<DayPickerInput formatDate={formatDate} parseDate={parseDate} format="DD.MM.YYYY" placeholder={`${formatDate(self.state.enddate, 'DD.MM.YYYY', 'ru')}`} value={self.state.enddate} dayPickerProps={{locale: 'ru', localeUtils: MomentLocaleUtils,}} onDayChange={day => mssqlsettings.dispatch({type:'EDIT_DATE', payload:{date:_.clone(day), type:'enddate'}})} />
-				&#8195;<button  className="realButton" onClick={this.onBtnClickHandler.bind(this)} id='submit'>Запустить отчет</button>
-				&#8195;<button  className="realButton" onClick={this.onBtnClickHandler.bind(this)} id='clear'>Очистить настройки</button>
+				&#8195;<button  className="realButton" onClick={self.onBtnClickHandler.bind(self)} id='submit'>Запустить отчет</button>
+				&#8195;<button  className="realButton" onClick={self.onBtnClickHandler.bind(self)} id='clear'>Очистить настройки</button>
 			</div>
 		);
 	}
@@ -528,7 +578,6 @@ class MyCalendar extends React.PureComponent{
 
 //компонент фильтра для складов
 class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
-  
 	constructor(props, context){
 		super(props, context);
 		this.state = {
@@ -541,7 +590,7 @@ class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
       
 	componentDidMount() {
 		let self = this;
-		var cancel = mssqlsettings.subscribe(function(){ 
+		let cancel = mssqlsettings.subscribe(function(){ 
 			let tempsearchcomponent = _.clone(mssqlsettings.getState().tmp.search[_.clone(mssqlsettings.getState().tmp.typewh)]);
 			let tempstorecomponent = _.clone(mssqlsettings.getState().filter[_.clone(mssqlsettings.getState().tmp.typewh)]);
 			for(let i = 0; i < tempstorecomponent.length; i++){
@@ -553,11 +602,11 @@ class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
 				self.setState({storecomponent: tempstorecomponent, searchcomponent: tempsearchcomponent, searchstring: _.clone(mssqlsettings.getState().tmp.searchstring[_.clone(mssqlsettings.getState().tmp.typewh)]), typewh: _.clone(mssqlsettings.getState().tmp.typewh)});
 			}
 		}); 
-		this.componentWillUnmount = cancel;
+		self.componentWillUnmount = cancel;
 	}
 	
 	onClickHandler(e){
-		var self = this;
+		let self = this;
 		let tempstorecomponent = _.clone(self.state.storecomponent);
 		switch(e.target.id){
 			case 'add':
@@ -576,7 +625,6 @@ class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
 	}
 	
 	onChangeHandler(e){
-		var self = this;
 		switch(e.target.name){
 			case 'searchstring':
 				mssqlsettings.dispatch({type:'SEARCH_FILTER', payload:{searchstring:e.target.value}, filter:_.clone(mssqlsettings.getState().tmp.typewh)});
@@ -588,28 +636,24 @@ class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
 	}
       
   	render() {
+		let self = this;
 		let MsSqlReportPanelFilterComponents = new Array;
 		let MsSqlReportPanelFilterComponentsStore = new Array;
 		let MsSqlReportPanelFilterComponentsSearch = new Array;
-		
-		for(let i = 0; i < this.state.searchcomponent.length; i++){
-			MsSqlReportPanelFilterComponentsSearch.push(<div title={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][this.state.searchcomponent[i]])}><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='add' name={this.state.searchcomponent[i]} value={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][this.state.searchcomponent[i]])} /></div>);
+		for(let i = 0; i < self.state.searchcomponent.length; i++){
+			MsSqlReportPanelFilterComponentsSearch.push(<div title={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][self.state.searchcomponent[i]])}><input type="button" className="unrealButton" onClick={self.onClickHandler.bind(self)} id='add' name={self.state.searchcomponent[i]} value={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][self.state.searchcomponent[i]])} /></div>);
 		}
-		
-		for(let i = 0; i < this.state.storecomponent.length; i++){
-			MsSqlReportPanelFilterComponentsStore.push(<div title={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][this.state.storecomponent[i]])}><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='del' name={this.state.storecomponent[i]} value={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][this.state.storecomponent[i]])} /></div>);
+		for(let i = 0; i < self.state.storecomponent.length; i++){
+			MsSqlReportPanelFilterComponentsStore.push(<div title={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][self.state.storecomponent[i]])}><input type="button" className="unrealButton" onClick={self.onClickHandler.bind(self)} id='del' name={self.state.storecomponent[i]} value={_.clone(mssqlsettings.getState().uids[_.clone(mssqlsettings.getState().tmp.typewh)][self.state.storecomponent[i]])} /></div>);
 		}
-		
-		let MsSqlReportPanelFilterComponentsSearchString = <input type="text" className="containerSearchInp" name="searchstring" onChange={this.onChangeHandler.bind(this)} value={this.state.searchstring} />;
+		let MsSqlReportPanelFilterComponentsSearchString = <input type="text" className="containerSearchInp" name="searchstring" onChange={self.onChangeHandler.bind(self)} value={self.state.searchstring} />;
 		let MsSqlReportPanelFilterComponentsTypeString =  new Array;
-		MsSqlReportPanelFilterComponentsTypeString.push(<option value="wh_retail" selected={(this.state.typewh === "wh_retail")?"selected":""}>Розничные склады</option>);
-		MsSqlReportPanelFilterComponentsTypeString.push(<option value="wh_wholesale" selected={(this.state.typewh === "wh_wholesale")?"selected":""}>Оптовые склады</option>);
-		MsSqlReportPanelFilterComponentsTypeString.push(<option value="warehouses" selected={(this.state.typewh === "warehouses")?"selected":""}>Все склады</option>);
-		
-		MsSqlReportPanelFilterComponents.push(<div className="containerSearchBlockCustom"><div className="containerSearchStringCustom">{MsSqlReportPanelFilterComponentsSearchString}</div><div className="containerTypeString"><select size="1" name="typeWH" className="containerTypeStringInp" onChange={this.onChangeHandler.bind(this)}> {MsSqlReportPanelFilterComponentsTypeString} </select></div></div>);
+		MsSqlReportPanelFilterComponentsTypeString.push(<option value="wh_retail" selected={(self.state.typewh === "wh_retail")?"selected":""}>Розничные склады</option>);
+		MsSqlReportPanelFilterComponentsTypeString.push(<option value="wh_wholesale" selected={(self.state.typewh === "wh_wholesale")?"selected":""}>Оптовые склады</option>);
+		MsSqlReportPanelFilterComponentsTypeString.push(<option value="warehouses" selected={(self.state.typewh === "warehouses")?"selected":""}>Все склады</option>);
+		MsSqlReportPanelFilterComponents.push(<div className="containerSearchBlockCustom"><div className="containerSearchStringCustom">{MsSqlReportPanelFilterComponentsSearchString}</div><div className="containerTypeString"><select size="1" name="typeWH" className="containerTypeStringInp" onChange={self.onChangeHandler.bind(self)}> {MsSqlReportPanelFilterComponentsTypeString} </select></div></div>);
 		MsSqlReportPanelFilterComponents.push(<div className="containerSearch">Позиции для отбора<div className="containerSearchDiv">{MsSqlReportPanelFilterComponentsSearch}</div></div>);
-		MsSqlReportPanelFilterComponents.push(<div className="containerFiltr">Отобранные позиции<div className="containerFiltrDiv">{MsSqlReportPanelFilterComponentsStore}</div></div>);
-			
+		MsSqlReportPanelFilterComponents.push(<div className="containerFiltr">Отобранные позиции<div className="containerFiltrDiv">{MsSqlReportPanelFilterComponentsStore}</div></div>);	
 		return (
 			<div className={"container MsSqlReportPanelFilter" + _.clone(mssqlsettings.getState().tmp.typewh) + "Search"}>
 				<div className="containerName">{_.clone(mssqlsettings.getState().rusnames[_.clone(mssqlsettings.getState().tmp.typewh)])}</div>
@@ -621,7 +665,6 @@ class MsSqlReportPanelFilterComponentsCustom extends React.PureComponent{
 
 //компонент фильтра.
 class MsSqlReportPanelFilterComponents extends React.PureComponent{
-  
 	constructor(props, context){
 		super(props, context);
 		this.state = {
@@ -633,7 +676,7 @@ class MsSqlReportPanelFilterComponents extends React.PureComponent{
       
 	componentDidMount() {
 		let self = this;
-		var cancel = mssqlsettings.subscribe(function(){ 
+		let cancel = mssqlsettings.subscribe(function(){ 
 			let tempsearchcomponent = _.clone(mssqlsettings.getState().tmp.search[self.props.data]);
 			let tempstorecomponent = _.clone(mssqlsettings.getState().filter[self.props.data]);
 			for(let i = 0; i < tempstorecomponent.length; i++){
@@ -645,11 +688,11 @@ class MsSqlReportPanelFilterComponents extends React.PureComponent{
 				self.setState({storecomponent: tempstorecomponent, searchcomponent: tempsearchcomponent, searchstring: _.clone(mssqlsettings.getState().tmp.searchstring[self.props.data])});
 			}
 		}); 
-		this.componentWillUnmount = cancel;
+		self.componentWillUnmount = cancel;
 	}
 	
 	onClickHandler(e){
-		var self = this;
+		let self = this;
 		let tempstorecomponent = _.clone(self.state.storecomponent);
 		switch(e.target.id){
 			case 'add':
@@ -668,7 +711,7 @@ class MsSqlReportPanelFilterComponents extends React.PureComponent{
 	}
 	
 	onChangeHandler(e){
-		var self = this;
+		let self = this;
 		switch(e.target.name){
 			case 'searchstring':
 				mssqlsettings.dispatch({type:'SEARCH_FILTER', payload:{searchstring:e.target.value}, filter:self.props.data});
@@ -677,27 +720,23 @@ class MsSqlReportPanelFilterComponents extends React.PureComponent{
 	}
       
   	render() {
+		let self = this;
 		let MsSqlReportPanelFilterComponents = new Array;
 		let MsSqlReportPanelFilterComponentsStore = new Array;
 		let MsSqlReportPanelFilterComponentsSearch = new Array;
-		
-		for(let i = 0; i < this.state.searchcomponent.length; i++){
-			MsSqlReportPanelFilterComponentsSearch.push(<div  title={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.searchcomponent[i]])}><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='add' name={this.state.searchcomponent[i]} value={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.searchcomponent[i]])} /></div>);
+		for(let i = 0; i < self.state.searchcomponent.length; i++){
+			MsSqlReportPanelFilterComponentsSearch.push(<div  title={_.clone(mssqlsettings.getState().uids[self.props.data][self.state.searchcomponent[i]])}><input type="button" className="unrealButton" onClick={self.onClickHandler.bind(self)} id='add' name={self.state.searchcomponent[i]} value={_.clone(mssqlsettings.getState().uids[self.props.data][self.state.searchcomponent[i]])} /></div>);
 		}
-		
-		for(let i = 0; i < this.state.storecomponent.length; i++){
-			MsSqlReportPanelFilterComponentsStore.push(<div  title={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.storecomponent[i]])}><input type="button" className="unrealButton" onClick={this.onClickHandler.bind(this)} id='del' name={this.state.storecomponent[i]} value={_.clone(mssqlsettings.getState().uids[this.props.data][this.state.storecomponent[i]])} /></div>);
+		for(let i = 0; i < self.state.storecomponent.length; i++){
+			MsSqlReportPanelFilterComponentsStore.push(<div  title={_.clone(mssqlsettings.getState().uids[self.props.data][self.state.storecomponent[i]])}><input type="button" className="unrealButton" onClick={self.onClickHandler.bind(self)} id='del' name={self.state.storecomponent[i]} value={_.clone(mssqlsettings.getState().uids[self.props.data][self.state.storecomponent[i]])} /></div>);
 		}
-		
-		let MsSqlReportPanelFilterComponentsSearchString = <input type="text" className="containerSearchInp" name="searchstring" onChange={this.onChangeHandler.bind(this)} value={this.state.searchstring} />;
-		
+		let MsSqlReportPanelFilterComponentsSearchString = <input type="text" className="containerSearchInp" name="searchstring" onChange={self.onChangeHandler.bind(self)} value={self.state.searchstring} />;
 		MsSqlReportPanelFilterComponents.push(<div className="containerSearchString">{MsSqlReportPanelFilterComponentsSearchString}</div>);
 		MsSqlReportPanelFilterComponents.push(<div className="containerSearch">Позиции для отбора<div className="containerSearchDiv">{MsSqlReportPanelFilterComponentsSearch}</div></div>);
-		MsSqlReportPanelFilterComponents.push(<div className="containerFiltr">Отобранные позиции<div className="containerFiltrDiv">{MsSqlReportPanelFilterComponentsStore}</div></div>);
-			
+		MsSqlReportPanelFilterComponents.push(<div className="containerFiltr">Отобранные позиции<div className="containerFiltrDiv">{MsSqlReportPanelFilterComponentsStore}</div></div>);	
 		return (
-			<div className={"container MsSqlReportPanelFilter" + this.props.data + "Search"}>
-				<div className="containerName">{_.clone(mssqlsettings.getState().rusnames[this.props.data])}</div>
+			<div className={"container MsSqlReportPanelFilter" + self.props.data + "Search"}>
+				<div className="containerName">{_.clone(mssqlsettings.getState().rusnames[self.props.data])}</div>
 				{MsSqlReportPanelFilterComponents}
 			</div>
 		);
@@ -737,8 +776,7 @@ class MsSqlReportPanelFilter extends React.PureComponent{
 
 //работа с фильтрами
 class MsSqlReportPanelSavedFilter extends React.PureComponent{
-  
-   constructor(props, context){
+	constructor(props, context){
 		super(props, context);
 		this.state = {
 			filters:_.clone(mssqlsettings.getState().filters),
@@ -749,17 +787,16 @@ class MsSqlReportPanelSavedFilter extends React.PureComponent{
     }
       
 	componentDidMount() {
-		var self = this;
-		var cancel = mssqlsettings.subscribe(function(){ 
+		let self = this;
+		let cancel = mssqlsettings.subscribe(function(){ 
 			if(!((_.isEqual(self.state.filters, mssqlsettings.getState().filters)) && (_.isEqual(self.state.filter, mssqlsettings.getState().filter)) && ((self.state.NameFilter === mssqlsettings.getState().tmp.namefilter)) && ((self.state.typewh === mssqlsettings.getState().tmp.typewh)))){
 				self.setState({filters: _.clone(mssqlsettings.getState().filters), filter: _.clone(mssqlsettings.getState().filter), NameFilter:_.clone(mssqlsettings.getState().tmp.namefilter), typewh:_.clone(mssqlsettings.getState().tmp.typewh)});
 			}
 		});
-		this.componentWillUnmount = cancel;
+		self.componentWillUnmount = cancel;
 	}
 	
 	onChangeHandler(e){
-		var self = this;
 		switch(e.target.name){
 			case 'SetNameFilter':
 				mssqlsettings.dispatch({type:'EDIT_NAME_FILTER', payload: {namefilter:e.target.value}});
@@ -773,7 +810,7 @@ class MsSqlReportPanelSavedFilter extends React.PureComponent{
 	}
 	
 	onBtnClickHandler(e){
-		var self = this;
+		let self = this;
 		switch(e.target.id){
 			case 'editfilter':
 				if(self.state.NameFilter !== ''){
@@ -789,18 +826,18 @@ class MsSqlReportPanelSavedFilter extends React.PureComponent{
 	}
       
   	render() {
+		let self = this;
 		let MsSqlReportPanelSavedFilter = new Array;
 		MsSqlReportPanelSavedFilter.push(<option value="">Фильтр не выбран</option>);
-		for(let j in this.state.filters) {
-			MsSqlReportPanelSavedFilter.push(<option value={j} selected={((_.isEqual(this.state.filters[j].filter, _.clone(mssqlsettings.getState().filter))) && ((this.state.filters[j].tmp.namefilter === _.clone(mssqlsettings.getState().tmp.namefilter))) && ((this.state.filters[j].tmp.typewh === _.clone(mssqlsettings.getState().tmp.typewh))) && (j === this.state.NameFilter))?"selected":""}>{j}</option>);
+		for(const j in self.state.filters) {
+			MsSqlReportPanelSavedFilter.push(<option value={j} selected={((_.isEqual(self.state.filters[j].filter, _.clone(mssqlsettings.getState().filter))) && ((self.state.filters[j].tmp.namefilter === _.clone(mssqlsettings.getState().tmp.namefilter))) && ((self.state.filters[j].tmp.typewh === _.clone(mssqlsettings.getState().tmp.typewh))) && (j === self.state.NameFilter))?"selected":""}>{j}</option>);
 		}
-		
 		return (
 			<div className="MsSqlReportPanelSavedFilter">
-				{(MsSqlReportPanelSavedFilter.length > 1)?<p><select size="1" name="selectedFilter" onChange={this.onChangeHandler.bind(this)}> {MsSqlReportPanelSavedFilter} </select></p>:""}
-				<div><div className="TextWhite">Имя фильтра:</div> <input type="text" name="SetNameFilter" onChange={this.onChangeHandler.bind(this)} value={this.state.NameFilter} /></div>
-				<div><button className="realButton" onClick={this.onBtnClickHandler.bind(this)} id='editfilter'>{(typeof(this.state.filters[this.state.NameFilter]) === 'undefined')?"Добавить фильтр":"Изменить фильтр"}</button></div>
-				{(typeof(this.state.filters[this.state.NameFilter]) !== 'undefined')?<button className="realButton" onClick={this.onBtnClickHandler.bind(this)} id='delfilter'>Удалить фильтр</button>:""}
+				{(MsSqlReportPanelSavedFilter.length > 1)?<p><select size="1" name="selectedFilter" onChange={self.onChangeHandler.bind(self)}> {MsSqlReportPanelSavedFilter} </select></p>:""}
+				<div><div className="TextWhite">Имя фильтра:</div> <input type="text" name="SetNameFilter" onChange={self.onChangeHandler.bind(self)} value={self.state.NameFilter} /></div>
+				<div><button className="realButton" onClick={self.onBtnClickHandler.bind(self)} id='editfilter'>{(typeof(self.state.filters[self.state.NameFilter]) === 'undefined')?"Добавить фильтр":"Изменить фильтр"}</button></div>
+				{(typeof(self.state.filters[self.state.NameFilter]) !== 'undefined')?<button className="realButton" onClick={self.onBtnClickHandler.bind(self)} id='delfilter'>Удалить фильтр</button>:""}
 			</div>
 		);
 	}
@@ -815,7 +852,7 @@ class MsSqlReportPanel extends React.PureComponent{
 				<MyPopup />
 				<div className="MsSqlPanelHeader">
 					<MyCalendar />
-					{(typeof(window.localStorage) !== 'undefined')?<MsSqlReportPanelSavedFilter />:""}
+					<MsSqlReportPanelSavedFilter />
 				</div>
 				<div className="MsSqlPanelBody">
 					<MsSqlReportPanelFilter />
