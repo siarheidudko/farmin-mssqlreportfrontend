@@ -1,4 +1,11 @@
-﻿.TextWhite{
+﻿body{
+	background-image: url(../images/fon1.jpg); 
+	background-size: auto;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position: center;
+}
+.TextWhite{
 	color: rgb(255, 255, 255);
 }
 .realButton {

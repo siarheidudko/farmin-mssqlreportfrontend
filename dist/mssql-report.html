@@ -33,9 +33,14 @@
 				});
 			});
 		}
+		document.addEventListener("DOMContentLoaded", function(){
+			if (window!==window.top) {
+				document.body.style.background = "none";
+			}
+		});
 		</script>
 	</head> 
-	<body> 
+	<body>
 		<button class="realButton" id="installer" style="display: none;">Установить приложение</button>
 		<div id=MsSqlReport /> 
 		<script type="text/javascript" src="mssql-report.js?v=2.2.1"></script>
@@ -56,7 +61,6 @@
 				global.event = event;
 				global.event.preventDefault();
 				_installbytton.style.display = "block";
-				document.body.style.background = "url(../images/fon3.jpg)";
 			});
 			var _installbytton = document.getElementById("installer");
 			_installbytton.addEventListener("click", function(mouseEvent) {
