@@ -21,7 +21,8 @@ import MomentLocaleUtils, {formatDate,parseDate} from 'react-day-picker/moment';
 let tempfilters;
 
 let mssqlsettings = createStore(editmssqlsettings);
-//window.mssqlsettings = mssqlsettings;
+window.mssqlsettings = mssqlsettings;
+window.popup = popup;
 
 function editmssqlsettings(state = {
 		filters:{},

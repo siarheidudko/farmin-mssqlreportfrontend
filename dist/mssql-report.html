@@ -1,1 +1,78 @@
-<html> <head> <link rel=stylesheet href=./mssql-report.css> <link rel=stylesheet href=./daypicker.css> <title>MSSQL отчеты</title> <meta charset=utf-8 /> </head> <body> <div id=MsSqlReport /> <script type="text/javascript" src="mssql-report.js"></script></body> </html>
+<html> 
+	<head>
+		<link rel="apple-touch-icon" sizes="57x57" href="./pwa/apple-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="./pwa/apple-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="./pwa/apple-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="./pwa/apple-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="./pwa/apple-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="./pwa/apple-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="./pwa/apple-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="./pwa/apple-icon-152x152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="./pwa/apple-icon-180x180.png">
+		<link rel="icon" type="image/png" sizes="192x192"  href="./pwa/android-icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="./pwa/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="./pwa/favicon-96x96.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="./pwa/favicon-16x16.png">
+		<link rel="manifest" href="./pwa/manifest.json">
+		<meta name="msapplication-TileColor" content="#ffffff">
+		<meta name="msapplication-TileImage" content="./pwa/ms-icon-144x144.png">
+		<meta name="theme-color" content="#ffffff">	
+		<meta name="viewport" content="width=device-width">
+		<link rel=stylesheet href="./mssql-report.css"> 
+		<link rel=stylesheet href="./daypicker.css"> 
+		<meta charset="utf-8" /> <title>MSSQL отчеты</title>
+		<script>
+		if ("serviceWorker" in navigator) {
+			window.addEventListener("load", function() {  
+				navigator.serviceWorker.register("sw.js").then(
+				function(registration) {
+					console.log("ServiceWorker registration successful with scope: ", registration.scope); 
+				},
+				function(err) {
+					console.log("ServiceWorker registration failed: ", err);
+				});
+			});
+		}
+		</script>
+	</head> 
+	<body> 
+		<button class="realButton" id="installer" style="display: none;">Установить приложение</button>
+		<div id=MsSqlReport /> 
+		<script type="text/javascript" src="mssql-report.js?v=2.2.1"></script>
+		<script>
+			//смена размера шапки
+			function replaceHeaderWidth(){
+				var _myheader = document.getElementsByClassName("MsSqlPanelHeader");
+				if(window.innerWidth < 725 && (_myheader[0])){
+					_myheader[0].style.zoom = parseInt(window.innerWidth/725*100)+"%";
+				}
+			}
+			replaceHeaderWidth();
+			window.onresize = replaceHeaderWidth();
+			
+			//событие установки pwa
+			var global = {};
+			window.addEventListener("beforeinstallprompt", function (event) {
+				global.event = event;
+				global.event.preventDefault();
+				_installbytton.style.display = "block";
+			});
+			var _installbytton = document.getElementById("installer");
+			_installbytton.addEventListener("click", function(mouseEvent) {
+				if(global.event){
+					global.event.prompt();  // Wait for the user to respond to the prompt
+					global.event.userChoice.then(function(choiceResult){
+						if (choiceResult.outcome === "accepted") {
+							_installbytton.style.display = "none";
+							popup("Приложение установлено!");
+						} else {
+							popup("Приложение не установлено!");
+						}
+					});
+				} else {
+					popup("Попробуйте позже!");
+				}
+			});
+		</script>
+	</body> 
+</html>
