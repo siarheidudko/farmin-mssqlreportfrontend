@@ -298,8 +298,8 @@ function FiltersOnEdit(){
 						popup('Фильтры изменены!');
 						tempfilters = _.clone(mssqlsettings.getState().filters);
 					} else {
-						if(this.responseText.substr(4) !== ''){
-							popup(this.responseText.substr(4));
+						if(this.responseText.substr(5) !== ''){
+							popup(this.responseText.substr(5));
 							tempfilters = _.clone(mssqlsettings.getState().filters);
 						} else {
 							popup('Не могу сохранить фильтры!');
@@ -385,8 +385,8 @@ function startOnDbRequest(){
 							loadDataFilters();
 						}
 					} else {
-						if(this.responseText.substr(4) !== ''){
-							popup(this.responseText.substr(4));
+						if(this.responseText.substr(5) !== ''){
+							popup(this.responseText.substr(5));
 						} else {
 							popup('Не могу загрузить сохраненные фильтры!');
 						}
