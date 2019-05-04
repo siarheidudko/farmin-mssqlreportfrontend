@@ -35,7 +35,8 @@ function editmssqlsettings(state = {
 			groups: [], 
 			subgroups: [],
 			producer: [],
-			providers: []
+			providers: [],
+			columns: []
 		}, 
 		all:{
 			warehouses:[],
@@ -46,7 +47,8 @@ function editmssqlsettings(state = {
 			groups: [], 
 			subgroups: [],
 			producer: [],
-			providers: []
+			providers: [],
+			columns: []
 		}, 
 		tmp:{
 			search:{
@@ -58,7 +60,8 @@ function editmssqlsettings(state = {
 				groups: [], 
 				subgroups: [], 
 				producer: [],
-				providers: []
+				providers: [],
+				columns: []
 			},
 			namefilter:"",
 			typewh:"wh_retail",
@@ -72,7 +75,8 @@ function editmssqlsettings(state = {
 				groups: "", 
 				subgroups: "", 
 				producer: "",
-				providers: ""
+				providers: "",
+				columns: ""
 			},
 			startdate: new Date(),
 			enddate: new Date(),
@@ -87,7 +91,8 @@ function editmssqlsettings(state = {
 			groups: {}, 
 			subgroups: {}, 
 			producer: {},
-			providers: {}
+			providers: {},
+			columns: {}
 		},
 		uidssearch:{
 			warehouses:{}, 
@@ -98,7 +103,8 @@ function editmssqlsettings(state = {
 			groups: {}, 
 			subgroups: {}, 
 			producer: {},
-			providers: {}
+			providers: {},
+			columns: {}
 		},
 		rusnames:{
 			warehouses:'Фильтр по складу (все)', 
@@ -109,7 +115,8 @@ function editmssqlsettings(state = {
 			groups: 'Фильтр по товарной группе', 
 			subgroups: 'Фильтр по товарной подгруппе', 
 			producer: 'Фильтр по производителю',
-			providers: 'Фильтр по поставщику'
+			providers: 'Фильтр по поставщику',
+			columns: 'Выгружаемые колонки'
 		}
 	}, action){
 		try {
@@ -774,6 +781,9 @@ class MsSqlReportPanelFilter extends React.PureComponent{
 				</div>
 				<div className={(window.innerWidth > 1220)?"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType2":"MsSqlReportPanelFilterLeft MsSqlReportPanelFilterType1"}>
 					<MsSqlReportPanelFilterComponents data="providers" />
+				</div>
+				<div className={(window.innerWidth > 1220)?"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType1":"MsSqlReportPanelFilterRight MsSqlReportPanelFilterType2"}>
+					<MsSqlReportPanelFilterComponents data="columns" />
 				</div>
 			</div>
 		);
